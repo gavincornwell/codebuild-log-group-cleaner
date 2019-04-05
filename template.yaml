@@ -7,7 +7,7 @@ Parameters:
   TriggerTime:
     Type: String
     Description: The time the Lambda function should be triggered each day, defaults to 11pm every day
-    Default: "cron(0 23 * * ? *)"
+    Default: "cron(0 22 * * ? *)"
 
   Owner:
     Type: String
@@ -17,8 +17,8 @@ Globals:
   Function:
     Runtime: nodejs8.10
     MemorySize: 128
-    Timeout: 15
-    CodeUri: ./target/lambda-log-group-cleaner.zip
+    Timeout: 300
+    CodeUri: ./target/codebuild-log-group-cleaner.zip
     Tags:
       Owner: !Ref Owner
 
@@ -30,15 +30,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
-      Policies:
-        - PolicyName: list-functions
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Action:
-                  - lambda:ListFunctions
-                Resource: "*"
-                Effect: Allow
+        - arn:aws:iam::aws:policy/AWSCodeBuildReadOnlyAccess
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -53,7 +45,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: cleaner.handler
-      Description: Function that deletes orphaned lambda log groups
+      Description: Function that deletes orphaned CodeBuild log groups
       Role: !GetAtt LogGroupCleanerLambdaRole.Arn
       Events:
         TriggerEvent:
